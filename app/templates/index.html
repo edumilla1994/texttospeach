@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AudioVerse - Convierte Texto y PDFs a Audio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-gray-50">
+    <!-- Header Professional -->
+    <header class="header-premium text-white">
+        <div class="container mx-auto px-4 py-14">
+            <h1 class="text-5xl font-bold mb-2 tracking-tight">AudioVerse</h1>
+            <p class="text-blue-100 text-lg font-light max-w-2xl">Convierte texto y PDFs a audio de forma instantánea</p>
+        </div>
+    </header>
+
+    <!-- Navegación -->
+    <nav class="sticky top-0 z-50 bg-white border-b shadow">
+        <div class="max-w-7xl mx-auto px-4 flex gap-2">
+            <button class="nav-btn-main active" onclick="mostrarTab('inicio')">
+                <i class="fas fa-home"></i> Inicio
+            </button>
+            <button class="nav-btn-main" onclick="mostrarTab('convertidor')">
+                <i class="fas fa-wand-magic-sparkles"></i> Convertidor
+            </button>
+            <button class="nav-btn-main" onclick="mostrarTab('instrucciones')">
+                <i class="fas fa-book"></i> Cómo usar
+            </button>
+            <button class="nav-btn-main" onclick="mostrarTab('info')">
+                <i class="fas fa-circle-info"></i> Información
+            </button>
+        </div>
+    </nav>
+
+    <!-- Contenido -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- INICIO -->
+        <section id="inicio" class="tab-main">
+            <div class="grid md:grid-cols-3 gap-6 mb-12">
+                <!-- Card 1 -->
+                <div class="card-hover bg-white p-8 rounded-lg">
+                    <div class="mb-6">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                            <i class="fas fa-keyboard text-blue-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-1">Texto a Audio</h3>
+                        <p class="text-gray-500 text-sm">Convierte palabras en voz</p>
+                    </div>
+                    <ul class="space-y-3 text-sm text-gray-700">
+                        <li class="flex items-center gap-3">
+                            <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+                            Hasta 1000 palabras
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+                            Sin límites de sesión
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+                            Control de velocidad
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="card-hover bg-white p-8 rounded-lg">
+                    <div class="mb-6">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                            <i class="fas fa-file-pdf text-blue-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-1">PDF a Audio</h3>
+                        <p class="text-gray-500 text-sm">Documentos en voz natural</p>
+                    </div>
+                    <ul class="space-y-3 text-sm text-gray-700">
+                        <li class="flex items-center gap-3">
+                            <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+                            Hasta 50 páginas
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+                            Selección de rango
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+                            Descarga rápida
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="card-hover bg-white p-8 rounded-lg">
+                    <div class="mb-6">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                            <i class="fas fa-sliders text-blue-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-1">Control Total</h3>
+                        <p class="text-gray-500 text-sm">Personaliza todo</p>
+                    </div>
+                    <ul class="space-y-3 text-sm text-gray-700">
+                        <li class="flex items-center gap-3">
+                            <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+                            Velocidad 0.5x - 2.0x
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+                            4 voces diferentes
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+                            Reproductor integrado
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Voces Section -->
+            <div class="bg-white p-8 rounded-lg border border-gray-200 mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Voces Disponibles</h2>
+                <div class="grid md:grid-cols-2 gap-4">
+                    {% for codigo, nombre in voces.items() %}
+                    <div class="card-hover p-4 bg-gray-50 rounded-lg">
+                        <p class="font-semibold text-gray-900">{{ nombre }}</p>
+                        <p class="text-sm text-gray-500">Voz neural natural</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <!-- CONVERTIDOR -->
+        <section id="convertidor" class="tab-main hidden">
+            <div class="grid md:grid-cols-4 gap-4 mb-6">
+                <div>
+                    <label class="block font-bold mb-2">Voz</label>
+                    <select id="voz" class="w-full p-2 border rounded-lg">
+                        {% for codigo, nombre in voces.items() %}
+                        <option value="{{ codigo }}">{{ nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold mb-2">Velocidad</label>
+                    <div class="flex gap-2 items-center">
+                        <input type="range" id="velocidad" min="0.5" max="2.0" step="0.1" value="1.0" class="flex-1">
+                        <span id="velocidadValor" class="font-bold">1.0x</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs conversión -->
+            <div class="flex gap-2 mb-4 border-b">
+                <button class="conv-btn active" data-conv="texto" onclick="cambiarConvTab(event)">
+                    <i class="fas fa-keyboard"></i> Texto
+                </button>
+                <button class="conv-btn" data-conv="pdf" onclick="cambiarConvTab(event)">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
+                <button class="conv-btn" data-conv="epub" onclick="cambiarConvTab(event)">
+                    <i class="fas fa-book"></i> EPUB
+                </button>
+            </div>
+
+            <!-- Texto -->
+            <div id="texto-conv" class="conv-content bg-white p-6 rounded-lg shadow">
+                <div class="mb-4">
+                    <label class="block font-bold mb-2">Tu texto</label>
+                    <textarea id="textoInput" class="w-full p-3 border rounded-lg resize-none" rows="6" placeholder="Pega tu texto aquí..."></textarea>
+                    <div class="flex justify-between mt-2">
+                        <span class="text-sm text-gray-600"><span id="wordCount">0</span> palabras (máx 1000)</span>
+                        <div class="w-32 bg-gray-200 rounded-full h-2">
+                            <div id="wordBar" class="bg-purple-600 h-2 rounded-full" style="width:0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <button id="btnTexto" class="btn-primary">
+                    <i class="fas fa-wand-magic-sparkles"></i> Generar Audio
+                </button>
+                <div id="loadingTexto" class="hidden mt-4">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- PDF -->
+            <div id="pdf-conv" class="conv-content hidden bg-white p-6 rounded-lg shadow">
+                <div class="mb-4">
+                    <label class="block font-bold mb-2">Carga tu PDF</label>
+                    <div id="uploadArea" class="border-2 border-dashed border-blue-300 p-8 rounded-lg text-center cursor-pointer hover:border-blue-600">
+                        <i class="fas fa-cloud-arrow-up text-4xl text-blue-400 mb-3"></i>
+                        <p class="font-bold">Arrastra un PDF aquí o haz clic</p>
+                        <input type="file" id="pdfFile" accept=".pdf" class="hidden">
+                    </div>
+                    
+                    <!-- Barra de progreso de carga -->
+                    <div id="uploadProgress" class="hidden mt-4">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-semibold text-gray-700">Cargando...</span>
+                            <span class="text-sm font-semibold text-blue-600" id="progressPercent">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div id="progressBar" class="bg-blue-600 h-3 rounded-full transition-all" style="width:0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="fileName" class="hidden mt-2 p-3 bg-green-100 rounded-lg">
+                        <i class="fas fa-check text-green-600"></i> <span id="fileNameText"></span>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block font-bold mb-2">Página desde</label>
+                        <input type="number" id="paginasDesde" min="1" value="1" class="w-full p-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-2">Página hasta</label>
+                        <input type="number" id="paginasHasta" min="1" value="5" class="w-full p-2 border rounded-lg">
+                    </div>
+                </div>
+
+                <button id="btnPDF" disabled class="btn-primary">
+                    <i class="fas fa-wand-magic-sparkles"></i> Generar Audio
+                </button>
+                <div id="loadingPDF" class="hidden mt-4">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- EPUB -->
+            <div id="epub-conv" class="conv-content hidden bg-white p-6 rounded-lg shadow">
+                <div class="mb-4">
+                    <label class="block font-bold mb-2">Carga tu EPUB</label>
+                    <div id="uploadAreaEpub" class="border-2 border-dashed border-blue-300 p-8 rounded-lg text-center cursor-pointer hover:border-blue-600">
+                        <i class="fas fa-cloud-arrow-up text-4xl text-blue-400 mb-3"></i>
+                        <p class="font-bold">Arrastra un EPUB aquí o haz clic</p>
+                        <input type="file" id="epubFile" accept=".epub" class="hidden">
+                    </div>
+                    
+                    <!-- Barra de progreso EPUB -->
+                    <div id="uploadProgressEpub" class="hidden mt-4">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-semibold text-gray-700">Cargando...</span>
+                            <span class="text-sm font-semibold text-blue-600" id="progressPercentEpub">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div id="progressBarEpub" class="bg-blue-600 h-3 rounded-full transition-all" style="width:0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="fileNameEpub" class="hidden mt-2 p-3 bg-green-100 rounded-lg">
+                        <i class="fas fa-check text-green-600"></i> <span id="fileNameTextEpub"></span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block font-bold mb-2">Selecciona capítulo</label>
+                    <select id="epubChapter" class="w-full p-2 border rounded-lg" disabled>
+                        <option>Carga un EPUB primero</option>
+                    </select>
+                </div>
+
+                <button id="btnEpub" disabled class="btn-primary">
+                    <i class="fas fa-wand-magic-sparkles"></i> Leer y Escuchar
+                </button>
+                <div id="loadingEpub" class="hidden mt-4">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- Mensajes -->
+            <div id="msgSuccess" class="hidden bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-lg mt-4">
+                <i class="fas fa-check"></i> <span id="msgSuccessText"></span>
+            </div>
+            <div id="msgError" class="hidden bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded-lg mt-4">
+                <i class="fas fa-times"></i> <span id="msgErrorText"></span>
+            </div>
+            <div id="msgInfo" class="hidden bg-blue-100 border border-blue-400 text-blue-800 px-4 py-3 rounded-lg mt-4">
+                <i class="fas fa-info"></i> <span id="msgInfoText"></span>
+            </div>
+
+            <!-- Reproductor -->
+            <div id="playerBox" class="hidden bg-white p-6 rounded-lg shadow mt-8">
+                <h3 class="font-bold mb-4">Tu audio</h3>
+                <audio id="audioPlayer" controls class="w-full mb-4"></audio>
+                <button id="downloadBtn" class="btn-secondary">
+                    <i class="fas fa-download"></i> Descargar
+                </button>
+            </div>
+        </section>
+
+        <!-- INSTRUCCIONES -->
+        <section id="instrucciones" class="tab-main hidden">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-3xl font-bold text-gray-900 mb-10">Cómo Usar</h1>
+
+                <div class="grid md:grid-cols-2 gap-8 mb-10">
+                    <!-- Texto -->
+                    <div class="bg-white rounded-lg p-8 border border-gray-200">
+                        <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <i class="fas fa-keyboard text-blue-600"></i>
+                            Texto a Audio
+                        </h2>
+                        <ol class="space-y-3 text-sm text-gray-700">
+                            <li class="flex gap-3">
+                                <span class="font-bold text-blue-600 flex-shrink-0">1.</span>
+                                <span>Abre la pestaña "Convertidor"</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="font-bold text-blue-600 flex-shrink-0">2.</span>
+                                <span>Selecciona una voz</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="font-bold text-blue-600 flex-shrink-0">3.</span>
+                                <span>Ajusta velocidad</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="font-bold text-blue-600 flex-shrink-0">4.</span>
+                                <span>Escribe tu texto (max. 1000 palabras)</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="font-bold text-blue-600 flex-shrink-0">5.</span>
+                                <span>Haz clic en "Generar Audio"</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="font-bold text-blue-600 flex-shrink-0">6.</span>
+                                <span>Descarga tu archivo</span>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <!-- PDF -->
+                    <div class="bg-white rounded-lg p-8 border border-gray-200">
+                        <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <i class="fas fa-file-pdf text-blue-600"></i>
+                            PDF a Audio
+                        </h2>
+                        <ol class="space-y-3 text-sm text-gray-700">
+                            <li class="flex gap-3">
+                                <span class="font-bold text-blue-600 flex-shrink-0">1.</span>
+                                <span>Abre "Convertidor" → "PDF"</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="font-bold text-blue-600 flex-shrink-0">2.</span>
+                                <span>Arrastra tu PDF</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="font-bold text-blue-600 flex-shrink-0">3.</span>
+                                <span>Selecciona páginas (max. 50)</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="font-bold text-blue-600 flex-shrink-0">4.</span>
+                                <span>Elige voz y velocidad</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="font-bold text-blue-600 flex-shrink-0">5.</span>
+                                <span>Haz clic en "Generar"</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="font-bold text-blue-600 flex-shrink-0">6.</span>
+                                <span>Descarga tu audio</span>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Tips -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-8">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">💡 Consejos</h3>
+                    <ul class="space-y-2 text-sm text-gray-700">
+                        <li>• Velocidad 0.5x a 0.8x: para aprender</li>
+                        <li>• Velocidad 1.0x: ritmo natural</li>
+                        <li>• Velocidad 1.5x a 2.0x: resúmenes rápidos</li>
+                        <li>• Prueba diferentes voces para encontrar tu favorita</li>
+                    </ul>
+                </div>
+                            <div>
+                                <p class="font-bold text-gray-900">Velocidad 1.2x-1.5x</p>
+                                <p class="text-sm text-gray-700">Ideal para repaso rápido</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <i class="fas fa-star text-yellow-500 text-xl flex-shrink-0 mt-1"></i>
+                            <div>
+                                <p class="font-bold text-gray-900">PDFs por capítulos</p>
+                                <p class="text-sm text-gray-700">Convierte por secciones para mejor calidad</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <i class="fas fa-star text-yellow-500 text-xl flex-shrink-0 mt-1"></i>
+                            <div>
+                                <p class="font-bold text-gray-900">Prueba todas las voces</p>
+                                <p class="text-sm text-gray-700">Cada una tiene su propio carácter</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- INFORMACIÓN -->
+        <section id="info" class="tab-main hidden">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-3xl font-bold text-gray-900 mb-10">Acerca de AudioVerse</h1>
+
+                <!-- Características -->
+                <div class="grid md:grid-cols-2 gap-6 mb-10">
+                    <div class="bg-white p-8 rounded-lg border border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">✓ Características</h3>
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            <li>100% Gratis - Sin costo</li>
+                            <li>Voces neurales IA</li>
+                            <li>Sin registro requerido</li>
+                            <li>Privado y seguro</li>
+                            <li>Descargas en MP3</li>
+                            <li>Resultados instantáneos</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-white p-8 rounded-lg border border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">⚙ Especificaciones</h3>
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            <li>Texto: hasta 1000 palabras</li>
+                            <li>PDF: hasta 50 páginas</li>
+                            <li>Velocidad: 0.5x a 2.0x</li>
+                            <li>Voces: 4 en español</li>
+                            <li>Formato: MP3</li>
+                            <li>Requiere: conexión internet</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Tecnología -->
+                <div class="bg-gray-900 text-white rounded-lg p-8 mb-10">
+                    <h3 class="text-lg font-bold mb-6">Tecnología</h3>
+                    <div class="grid md:grid-cols-3 gap-6 text-sm">
+                        <div class="border-l-2 border-blue-500 pl-4">
+                            <p class="text-blue-400 font-semibold mb-1">Backend</p>
+                            <p>Flask + Python</p>
+                        </div>
+                        <div class="border-l-2 border-blue-500 pl-4">
+                            <p class="text-blue-400 font-semibold mb-1">Frontend</p>
+                            <p>HTML5 + Tailwind</p>
+                        </div>
+                        <div class="border-l-2 border-blue-500 pl-4">
+                            <p class="text-blue-400 font-semibold mb-1">Audio</p>
+                            <p>Edge-TTS + IA</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA -->
+                <div class="bg-blue-50 rounded-lg p-8 text-center border border-blue-200">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">¿Listo para empezar?</h3>
+                    <p class="text-gray-700 mb-6">Convierte tu contenido a audio en segundos</p>
+                    <button onclick="mostrarTab('convertidor')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors">
+                        Ir al Convertidor
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

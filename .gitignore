@@ -1,0 +1,48 @@
+# Reflex
+.web/
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+
+# Audio files
+media/
+*.mp3
+*.wav
+*.m4a
+
+# Uploads
+uploads/
+*.pdf
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+venv/
+env/
+.env
+.python-version
+
+# Flask
+instance/
+.webassets-cache
+
+# Logs
+logs/
+*.log
+
+# Cache
+.pytest_cache/
+.coverage
+htmlcov/
+
