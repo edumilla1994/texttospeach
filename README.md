@@ -1,23 +1,81 @@
-# 🎵 Edge-TTS Web - Convertidor de Texto/PDF a Audio
+# 🎵 AudioVerse
 
-Convierte texto y PDFs a audio con voces neurales naturales de Microsoft Edge (gratis, sin API key, sin instalación pesada).
+Convierte texto, PDFs y EPUBs a audio con voces neurales en tiempo real. Una herramienta minimalista y profesional para crear audiolibros y contenido de audio.
 
-## 🚀 Inicio rápido
+## ✨ Características
+
+- ✅ **Texto a Audio**: Convierte hasta 1000 palabras a voz natural
+- ✅ **PDF a Audio**: Lee PDFs con barra de progreso y selección de páginas
+- ✅ **EPUB a Audio**: Carga libros electrónicos y escucha mientras lees
+- ✅ **Voces Neurales**: 4 voces diferentes en español (Microsoft Edge)
+- ✅ **Control de Velocidad**: Desde 0.5x hasta 2.0x
+- ✅ **Barra de Progreso**: Visualiza el estado de carga en tiempo real
+- ✅ **Reproducción Integrada**: Escucha en la plataforma
+- ✅ **Descarga MP3**: Guarda tu audio localmente
+- ✅ **100% Gratis**: Sin registro ni publicidad
+- ✅ **Privado**: Tus datos no se guardan
+
+## 🚀 Inicio Rápido
 
 ```bash
-python main.py
-```
+# 1. Instalar dependencias
+pip install -r requirements.txt
 
-Luego abre en tu navegador:
-```
+# 2. Ejecutar
+python main.py
+
+# 3. Abrir en navegador
 http://localhost:5000
 ```
 
-## 📁 Estructura del proyecto
+## 📋 Requisitos
+
+Python 3.8+ con las siguientes librerías:
+- Flask 3.0.0
+- edge-tts 6.1.12
+- pdfplumber 0.10.3
+- python-multipart 0.0.6
+
+## 🎯 Cómo Usar
+
+### Texto a Audio
+1. Selecciona "Convertidor" → "Texto"
+2. Elige voz y velocidad
+3. Escribe tu texto (máx 1000 palabras)
+4. Haz clic en "Generar Audio"
+5. Descarga el MP3
+
+### PDF a Audio
+1. Ve a "Convertidor" → "PDF"
+2. Carga tu PDF (verás el % de progreso)
+3. Selecciona el rango de páginas
+4. Genera el audio
+5. Descarga tu audiolibro
+
+### EPUB a Audio  
+1. Abre "Convertidor" → "EPUB"
+2. Carga tu archivo EPUB
+3. Selecciona el capítulo
+4. Escucha mientras lees
+5. Descarga el audio
+
+## 📁 Estructura
 
 ```
-251225/
-├── main.py                  ← Ejecutar esto
+audioverse/
+├── app/
+│   ├── __init__.py
+│   ├── utils.py
+│   ├── static/
+│   │   ├── css/style.css       (Estilos minimalistas)
+│   │   └── js/script.js        (Lógica + progreso + EPUB)
+│   └── templates/
+│       └── index.html          (4 tabs + 3 conversores)
+├── main.py                      (Servidor Flask)
+├── config.py                    (Configuración)
+├── requirements.txt             (Dependencias)
+└── README.md
+```
 ├── config.py                ← Configuración centralizada
 ├── requirements.txt         ← Dependencias Python
 ├── verificar.py             ← Verificar instalación
