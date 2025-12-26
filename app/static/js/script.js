@@ -162,16 +162,31 @@ function mostrarPlayer(show, url = null) {
     }
 }
 
-function descargarAudio() {
+async function descargarAudio() {
     const url = elementos.audioPlayer.src;
     if (!url) return;
+    const suggested = elementos.downloadBtn.dataset.filename || 'audio.mp3';
     
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'audio.mp3';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+        // Usar fetch + blob para mejor control del nombre de descarga
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Error descargando archivo');
+        
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = suggested;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Liberar memoria después de un tiempo
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+    } catch (error) {
+        mostrarMensaje('Error', '❌ Error descargando: ' + error.message);
+    }
 }
 
 // ========== TABS DE CONVERSIÓN ==========
@@ -203,7 +218,6 @@ function cargarPDF(e) {
     const intervalo = simularProgresoDescarga();
     elementos.loadingPDF.classList.remove('hidden');
     mostrarPlayer(false);
-    mostrarMensaje('Info', '📤 Cargando PDF...');
     
     fetch('/api/upload-pdf', {
         method: 'POST',
@@ -212,26 +226,38 @@ function cargarPDF(e) {
     .then(r => r.json())
     .then(data => {
         clearInterval(intervalo);
-        elementos.uploadProgress.classList.add('hidden');
-        elementos.progressBar.style.width = '0%';
-        elementos.progressPercent.textContent = '0%';
-        elementos.loadingPDF.classList.add('hidden');
         
-        if (data.success) {
-            pdfCargado = true;
-            pdfPath = data.path;
-            elementos.fileNameText.textContent = `${data.filename} (${data.paginas} páginas)`;
-            elementos.fileName.classList.remove('hidden');
-            elementos.btnPDF.disabled = false;
-            elementos.paginasDesde.max = data.paginas;
-            elementos.paginasHasta.max = data.paginas;
-            elementos.paginasHasta.value = Math.min(5, data.paginas);
-            mostrarMensaje('Success', `✅ PDF cargado: ${data.paginas} páginas`);
-        } else {
-            mostrarMensaje('Error', `❌ ${data.error || 'Error al cargar PDF'}`);
-        }
+        // Completar progreso
+        elementos.progressBar.style.width = '100%';
+        elementos.progressPercent.textContent = '100%';
+        document.getElementById('statusMessage').textContent = '✓ PDF procesado exitosamente';
+        document.getElementById('substatus').textContent = 'Listo para convertir a audio';
+        
+        // Esperar un poco antes de ocultar
+        setTimeout(() => {
+            elementos.uploadProgress.classList.add('hidden');
+            elementos.progressBar.style.width = '0%';
+            elementos.progressPercent.textContent = '0%';
+            elementos.loadingPDF.classList.add('hidden');
+            
+            if (data.success) {
+                pdfCargado = true;
+                pdfPath = data.path;
+                elementos.fileNameText.textContent = `${data.filename} • ${data.paginas} páginas`;
+                elementos.fileName.classList.remove('hidden');
+                elementos.btnPDF.disabled = false;
+                elementos.paginasDesde.max = data.paginas;
+                elementos.paginasHasta.max = data.paginas;
+                elementos.paginasHasta.value = Math.min(5, data.paginas);
+                mostrarMensaje('Success', `✅ PDF cargado: ${data.paginas} páginas`);
+            } else {
+                mostrarMensaje('Error', `❌ ${data.error || 'Error al cargar PDF'}`);
+            }
+        }, 1000);
     })
     .catch(err => {
+        clearInterval(intervalo);
+        elementos.uploadProgress.classList.add('hidden');
         elementos.loadingPDF.classList.add('hidden');
         mostrarMensaje('Error', `❌ Error: ${err}`);
     });
@@ -362,18 +388,38 @@ function handleDrop(e) {
 function simularProgresoDescarga() {
     elementos.uploadProgress.classList.remove('hidden');
     let progreso = 0;
+    const mensajes = [
+        'Procesando PDF...',
+        'Leyendo contenido...',
+        'Extrayendo texto...',
+        'Analizando páginas...',
+        'Preparando conversión...',
+        'Casi listo...'
+    ];
+    
+    let mensajeIndex = 0;
     
     const intervalo = setInterval(() => {
-        progreso += Math.random() * 30;
-        if (progreso > 95) progreso = 95;
+        progreso += Math.random() * 25;
+        if (progreso > 90) progreso = 90;
         
         elementos.progressBar.style.width = progreso + '%';
         elementos.progressPercent.textContent = Math.floor(progreso) + '%';
         
-        if (progreso >= 95) {
+        // Cambiar mensaje cada cierto progreso
+        if (Math.floor(progreso) % 15 === 0 && mensajeIndex < mensajes.length - 1) {
+            mensajeIndex++;
+            elementos.statusMessage.textContent = mensajes[mensajeIndex];
+        }
+        
+        // Mostrar substatus
+        const tiempoEstimado = Math.ceil((100 - progreso) / 25);
+        document.getElementById('substatus').textContent = `Tiempo estimado: ${tiempoEstimado}s`;
+        
+        if (progreso >= 90) {
             clearInterval(intervalo);
         }
-    }, 300);
+    }, 400);
     
     return intervalo;
 }
@@ -412,36 +458,59 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-function cargarEPUB(event) {
+async function cargarEPUB(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
-    simularProgresoDescargaEpub();
-    
-    setTimeout(() => {
+    // Mostrar indicador de progreso mientras se sube
+    elementos.uploadProgressEpub.classList.remove('hidden');
+    elementos.progressBarEpub.style.width = '10%';
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const resp = await fetch('/api/upload-epub', {
+            method: 'POST',
+            body: formData
+        });
+
         elementos.uploadProgressEpub.classList.add('hidden');
         elementos.progressBarEpub.style.width = '0%';
         elementos.progressPercentEpub.textContent = '0%';
-        
+
+        if (!resp.ok) {
+            const err = await resp.json();
+            mostrarMensaje('Error', '❌ Error subiendo EPUB: ' + (err.error || resp.statusText));
+            return;
+        }
+
+        const data = await resp.json();
         elementos.fileNameEpub.classList.remove('hidden');
-        elementos.fileNameTextEpub.textContent = file.name;
+        elementos.fileNameTextEpub.textContent = data.filename || file.name;
         elementos.btnEpub.disabled = false;
         elementos.epubChapter.disabled = false;
-        
+
         epubCargado = true;
         epubData = {
-            nombre: file.name,
-            tamaño: file.size
+            nombre: data.filename || file.name,
+            tamaño: file.size,
+            capitulos: data.chapters || [],
+            title: data.title || '',
+            author: data.author || ''
         };
-        
-        // Simular capítulos disponibles
-        const capitulos = ['Introducción', 'Capítulo 1', 'Capítulo 2', 'Capítulo 3', 'Conclusión'];
-        elementos.epubChapter.innerHTML = capitulos.map((cap, idx) => 
-            `<option value="${idx}">${cap}</option>`
-        ).join('');
-        
-        mostrarMensaje('Success', '✓ EPUB cargado correctamente');
-    }, 2000);
+
+        // Poblamos select con capítulos reales (preservar orden y títulos)
+        const capitulos = epubData.capitulos.length ? epubData.capitulos : [{ title: 'Capítulo 1' }];
+        elementos.epubChapter.innerHTML = capitulos.map((cap, idx) => {
+            const title = (typeof cap === 'object' && cap.title) ? cap.title : String(cap);
+            return `<option value="${idx}">${idx + 1}. ${title}</option>`;
+        }).join('');
+
+        mostrarMensaje('Success', '✓ EPUB subido correctamente');
+    } catch (error) {
+        elementos.uploadProgressEpub.classList.add('hidden');
+        mostrarMensaje('Error', '❌ Error subiendo EPUB: ' + error.message);
+    }
 }
 
 function simularProgresoDescargaEpub() {
@@ -473,6 +542,8 @@ async function generarAudioEPUB() {
     elementos.loadingEpub.classList.remove('hidden');
     elementos.btnEpub.disabled = true;
     
+    // Simular progreso de generación (porcentaje) mientras el servidor procesa
+    const genInterval = simularProgresoGeneracionEpub();
     try {
         const response = await fetch('/api/generar-epub', {
             method: 'POST',
@@ -487,15 +558,49 @@ async function generarAudioEPUB() {
         
         if (response.ok) {
             const data = await response.json();
-            mostrarAudio(data.audio);
+            // completar progreso
+            elementos.progressBarEpub.style.width = '100%';
+            elementos.progressPercentEpub.textContent = '100%';
+            mostrarPlayer(true, data.audio);
+            // Guardar nombre de descarga sugerido
+            if (data.download_name) {
+                elementos.downloadBtn.dataset.filename = data.download_name;
+            } else if (data.filename) {
+                elementos.downloadBtn.dataset.filename = data.filename;
+            }
             mostrarMensaje('Success', '✓ Audio generado. Escuchando y leyendo...');
         } else {
-            mostrarMensaje('Error', '❌ Error al generar audio');
+            let errText = response.statusText;
+            try {
+                const err = await response.json();
+                errText = err.error || JSON.stringify(err);
+            } catch (e) {}
+            mostrarMensaje('Error', '❌ Error al generar audio: ' + errText);
         }
     } catch (error) {
         mostrarMensaje('Error', '❌ Error: ' + error.message);
     } finally {
-        elementos.loadingEpub.classList.add('hidden');
+        // detener simulador de progreso
+        clearInterval(genInterval);
+        // ocultar loading y resetear barra tras breve pausa
+        setTimeout(() => {
+            elementos.loadingEpub.classList.add('hidden');
+            elementos.progressBarEpub.style.width = '0%';
+            elementos.progressPercentEpub.textContent = '0%';
+        }, 700);
         elementos.btnEpub.disabled = false;
     }
+}
+
+function simularProgresoGeneracionEpub() {
+    elementos.uploadProgressEpub.classList.remove('hidden');
+    let progreso = 0;
+    const intervalo = setInterval(() => {
+        // incrementar progresivamente hasta 95%
+        progreso += Math.random() * 8;
+        if (progreso > 95) progreso = 95;
+        elementos.progressBarEpub.style.width = Math.floor(progreso) + '%';
+        elementos.progressPercentEpub.textContent = Math.floor(progreso) + '%';
+    }, 800);
+    return intervalo;
 }

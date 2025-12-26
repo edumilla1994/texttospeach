@@ -31,8 +31,8 @@ print("\n" + "=" * 60)
 
 if todas_ok:
     print("\n🎉 ¡TODO LISTO! Puedes ejecutar:\n")
-    print("   python app.py")
-    print("\nLuego abre: http://localhost:3000\n")
+    print("   python main.py")
+    print("\nLuego abre: http://localhost:5000\n")
 else:
     print("\n⚠️  Faltan algunas dependencias. Instalando...\n")
     subprocess.run([

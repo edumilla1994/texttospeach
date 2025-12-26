@@ -2,3 +2,5 @@ flask==3.0.0
 pydub==0.25.1
 edge-tts==6.1.12
 pdfplumber==0.10.3
+ebooklib==0.20
+beautifulsoup4==4.12.2

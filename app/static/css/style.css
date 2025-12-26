@@ -255,3 +255,35 @@ a:hover {
     background: #1e40af;
     color: white;
 }
+
+/* Animaciones avanzadas */
+@keyframes pulse-smooth {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes shine {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.animate-pulse {
+    animation: pulse-smooth 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
